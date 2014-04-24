@@ -37,6 +37,7 @@ class EmailSubscriptionWidget extends WP_Widget {
     public function widget($args, $instance) {
         extract($args, EXTR_SKIP);
         $promotion=get_option('emailSub-promotion', true);
+        $currentPage=(is_ssl()?'https://':'http://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 
         /*
          * Print widget
@@ -52,6 +53,8 @@ class EmailSubscriptionWidget extends WP_Widget {
             <form id="emailSub-form" action="<?php echo site_url('wp-admin/admin-ajax.php')?>">
                 <input type="hidden" name="success_msg" id="emailSub-success" value="<?php echo $instance['success_msg'];?>" />
                 <input type="hidden" name="fail_msg" id="emailSub-fail" value="<?php echo $instance['fail_msg'];?>" />
+                <input type="hidden" name="current_page" id="emailSub-page" value="<?php echo $currentPage;?>" />
+                <input type="hidden" name="action" value="email_subscription" />
                 <?php
                 global $polylang;
                 if(isset($polylang)) { ?>
