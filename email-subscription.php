@@ -35,32 +35,65 @@ include_once dirname(__FILE__)."/EmailSubscriptionWidget.php";
 include_once dirname(__FILE__)."/EmailSubscriptionDatabase.php";
 
 /**
+ * Return response to ajax request
+ */
+function emailSub_ajaxResponse($resp, $isAjax) {
+	if ($isAjax)
+		exit(json_encode($resp));
+
+	$stat = $resp['status'];
+	switch ($stat) {
+		case 200: $text = 'OK'; break;
+		case 400: $text = 'Bad Request'; break;
+		default:  $text = 'Internal Server Error'; $stat = 500; break;
+	}
+	$prot = (isset($_SERVER['SERVER_PROTOCOL']) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.0');
+	header($prot . ' ' . $stat . ' ' . $text);
+
+	get_header();
+	print('<h2>' . $resp['message'] . '</h2>');
+	get_sidebar();
+	get_footer();
+	exit();
+}
+
+/**
  * When a user fills in the form and press send this action will take place
  * Save the email in the database
  */
 function emailSub_ajaxCallback() {
-	
-	$email = $_POST['email'];
-    $language = isset($_POST['language'])?$_POST['language']:'';
+
+	$ajaxResponse = true;
+	if (isset($_GET['email'])) {
+		$ajaxResponse = false;
+		$email = $_GET['email'];
+	} else {
+		$email = $_POST['email'];
+	}
+	$language = isset($_POST['language'])?$_POST['language']:(isset($_GET['language'])?$_GET['language']:'');
 
 	//validate email
 	if(!is_email($email)){
-		die(json_encode(array(
+		emailSub_ajaxResponse(array(
 				'status'=>400,
-				'message'=>'Email is not valid',
-		)));
+				'message'=>'Email is not valid'
+		), $ajaxResponse);
 	}
-	
+
 	$emailDB=new EmailSubscriptionDatabase();
 	if(!$emailDB->addEmail($email, $language)){
-		die(json_encode(array(
+		$msg = htmlspecialchars(isset($_POST['fail_msg"'])?$_POST['fail_msg"']:(isset($_GET['fail_msg"'])?$_GET['fail_msg"']:'An unexpected error occurred'));
+		emailSub_ajaxResponse(array(
 				'status'=>500,
-		)));
+				'message'=>$msg
+		), $ajaxResponse);
 	}
-	
-	die(json_encode(array(
+
+	$msg = htmlspecialchars(isset($_POST['success_msg"'])?$_POST['success_msg"']:(isset($_GET['success_msg"'])?$_GET['success_msg"']:'Thank you for subscribing'));
+	emailSub_ajaxResponse(array(
 		'status'=>200,
-	)));
+		'message'=>$msg
+	), $ajaxResponse);
 }
 //register callback
 add_action('wp_ajax_email_subscription', 'emailSub_ajaxCallback');
