@@ -82,14 +82,14 @@ function emailSub_ajaxCallback() {
 
 	$emailDB=new EmailSubscriptionDatabase();
 	if(!$emailDB->addEmail($email, $language)){
-		$msg = htmlspecialchars(isset($_POST['fail_msg"'])?$_POST['fail_msg"']:(isset($_GET['fail_msg"'])?$_GET['fail_msg"']:'An unexpected error occurred'));
+		$msg = htmlspecialchars(isset($_POST['fail_msg'])?$_POST['fail_msg']:(isset($_GET['fail_msg'])?$_GET['fail_msg']:'An unexpected error occurred'));
 		emailSub_ajaxResponse(array(
 				'status'=>500,
 				'message'=>$msg
 		), $ajaxResponse);
 	}
 
-	$msg = htmlspecialchars(isset($_POST['success_msg"'])?$_POST['success_msg"']:(isset($_GET['success_msg"'])?$_GET['success_msg"']:'Thank you for subscribing'));
+	$msg = htmlspecialchars(isset($_POST['success_msg'])?$_POST['success_msg']:(isset($_GET['success_msg'])?$_GET['success_msg']:'Thank you for subscribing'));
 	emailSub_ajaxResponse(array(
 		'status'=>200,
 		'message'=>$msg
